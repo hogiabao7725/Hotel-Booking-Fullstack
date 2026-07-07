@@ -9,14 +9,18 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: true
     properties:
       hibernate:
         format_sql: true
     open-in-view: false
 
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+
 server:
   port: 8080
   servlet:
-    context-path: "api/v1"
+    context-path: "/api"
