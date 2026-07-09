@@ -1,4 +1,4 @@
-package com.hogiabao7725.hotelbooking.dto.request.common;
+package com.hogiabao7725.hotelbooking.dto.common;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
