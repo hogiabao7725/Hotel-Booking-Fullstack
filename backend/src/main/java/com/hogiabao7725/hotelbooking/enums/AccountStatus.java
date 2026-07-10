@@ -2,7 +2,7 @@ package com.hogiabao7725.hotelbooking.enums;
 
 
 public enum AccountStatus implements ValueEnum {
-    PENDING(0),
+    INACTIVE(0),
     ACTIVE(1),
     BANNED(2),
     DELETED(3);

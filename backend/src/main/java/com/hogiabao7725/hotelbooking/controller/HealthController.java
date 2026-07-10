@@ -1,6 +1,6 @@
 package com.hogiabao7725.hotelbooking.controller;
 
-import com.hogiabao7725.hotelbooking.dto.request.common.ApiResponse;
+import com.hogiabao7725.hotelbooking.dto.common.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

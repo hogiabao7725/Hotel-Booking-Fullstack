@@ -24,7 +24,7 @@ public class Profile extends BaseEntity {
     @Column(name = "full_name", nullable = false, length = 100)
     private String fullName;
 
-    @Column(unique = true, length = 20)
+    @Column(name = "phone", unique = true, length = 20)
     private String phone;
 
     @Column(name = "id_card", length = 20)
