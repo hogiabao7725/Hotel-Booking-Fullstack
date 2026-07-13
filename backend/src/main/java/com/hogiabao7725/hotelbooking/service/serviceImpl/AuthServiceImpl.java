@@ -72,7 +72,7 @@ public class AuthServiceImpl implements AuthService {
             account.setProfile(profile);
         }
 
-        // account = accountRepository.save(account);
+        account = accountRepository.save(account);
 
         // Generate verification token and send email
         String token = oneTimeTokenService.createToken(
