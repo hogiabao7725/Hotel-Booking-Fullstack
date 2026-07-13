@@ -20,6 +20,41 @@ spring:
     enabled: true
     baseline-on-migrate: true
 
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      timeout: ${REDIS_TIMEOUT}
+
+
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            require: true
+    default-encoding: UTF-8
+
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    cache: false
+
+app:
+  frontend:
+    url: ${APP_FRONTEND_URL}
+  mail:
+    from: ${APP_MAIL_FROM}
+  verify-email:
+    expiration: ${APP_VERIFY_TOKEN_EXPIRATION}
+    prefix: ${APP_VERIFY_TOKEN_PREFIX}
+
 server:
   port: 8080
   servlet:

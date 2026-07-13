@@ -7,4 +7,7 @@ public interface AuthService {
 
     RegisterResponse register(RegisterRequest request);
 
+    void verifyEmail(String token);
+
+    void resendVerification(String email);
 }
