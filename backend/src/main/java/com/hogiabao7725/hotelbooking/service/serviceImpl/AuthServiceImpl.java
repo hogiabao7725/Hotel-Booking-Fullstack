@@ -92,10 +92,11 @@ public class AuthServiceImpl implements AuthService {
         Account account = accountRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Account", "email", email));
         account.setStatus(AccountStatus.ACTIVE);
-        // account = accountRepository.save(account);
+        accountRepository.save(account);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public void resendVerification(String email) {
         Account account = accountRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Account", "email", email));
