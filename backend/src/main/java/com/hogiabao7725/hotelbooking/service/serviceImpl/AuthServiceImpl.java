@@ -1,7 +1,9 @@
 package com.hogiabao7725.hotelbooking.service.serviceImpl;
 
 import com.hogiabao7725.hotelbooking.config.properties.VerifyEmailProperties;
+import com.hogiabao7725.hotelbooking.dto.request.auth.LoginRequest;
 import com.hogiabao7725.hotelbooking.dto.request.auth.RegisterRequest;
+import com.hogiabao7725.hotelbooking.dto.response.auth.LoginResponse;
 import com.hogiabao7725.hotelbooking.dto.response.auth.RegisterResponse;
 import com.hogiabao7725.hotelbooking.entity.Account;
 import com.hogiabao7725.hotelbooking.entity.Profile;
@@ -16,10 +18,15 @@ import com.hogiabao7725.hotelbooking.mapper.AccountMapper;
 import com.hogiabao7725.hotelbooking.mapper.ProfileMapper;
 import com.hogiabao7725.hotelbooking.repository.AccountRepository;
 import com.hogiabao7725.hotelbooking.repository.RoleRepository;
+import com.hogiabao7725.hotelbooking.security.jwt.JwtTokenProvider;
 import com.hogiabao7725.hotelbooking.service.AuthService;
 import com.hogiabao7725.hotelbooking.service.EmailService;
 import com.hogiabao7725.hotelbooking.service.OneTimeTokenService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +46,8 @@ public class AuthServiceImpl implements AuthService {
     private final OneTimeTokenService oneTimeTokenService;
     private final EmailService emailService;
     private final VerifyEmailProperties verifyEmailProperties;
+    private final AuthenticationManager authenticationManager;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Override
     @Transactional
@@ -83,6 +92,19 @@ public class AuthServiceImpl implements AuthService {
         emailService.sendVerification(account.getEmail(), account.getProfile().getFullName(), token);
 
         return accountMapper.toResponse(account);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public LoginResponse login(LoginRequest request) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.email(), request.password())
+        );
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String accessToken = jwtTokenProvider.generateToken(authentication);
+
+        return new LoginResponse(accessToken, "Bear");
     }
 
     @Override

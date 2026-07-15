@@ -17,9 +17,6 @@ repositories {
     mavenCentral()
 }
 
-// KHU VỰC QUẢN LÝ VERSION TẬP TRUNG
-val mapstructVersion = "1.6.3"
-
 dependencies {
     // Core
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
@@ -43,8 +40,13 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok")
 
     // MapStruct
-    implementation("org.mapstruct:mapstruct:$mapstructVersion")
-    annotationProcessor("org.mapstruct:mapstruct-processor:$mapstructVersion")
+    implementation("org.mapstruct:mapstruct:1.6.3")
+    annotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
+
+    // JWT
+    implementation("io.jsonwebtoken:jjwt-api:0.13.0")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.13.0")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.13.0")
 
     // Docs
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2")

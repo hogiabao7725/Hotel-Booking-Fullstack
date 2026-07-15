@@ -1,4 +1,4 @@
-package com.hogiabao7725.hotelbooking.security;
+package com.hogiabao7725.hotelbooking.security.config;
 
 public final class SecurityEndpoints {
 

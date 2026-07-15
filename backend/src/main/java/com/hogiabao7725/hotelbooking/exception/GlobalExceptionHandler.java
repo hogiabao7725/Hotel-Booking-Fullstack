@@ -1,9 +1,14 @@
 package com.hogiabao7725.hotelbooking.exception;
 
 import com.hogiabao7725.hotelbooking.dto.common.ApiResponse;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -47,6 +52,45 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(ErrorCode.VALIDATION_FAILED.name(),
                                         ErrorCode.VALIDATION_FAILED.getDefaultMessage(),
                                         errors));
+    }
+
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<ApiResponse<Void>> handleExpiredJwtException(ExpiredJwtException ex) {
+        log.warn("JWT Expired: {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.error(ErrorCode.ACCESS_TOKEN_EXPIRED.name(),
+                                        ErrorCode.ACCESS_TOKEN_EXPIRED.getDefaultMessage()));
+    }
+
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<ApiResponse<Void>> handleJwtException(JwtException ex) {
+        log.warn("JWT Validation Failed: {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.error(ErrorCode.ACCESS_TOKEN_INVALID.name(),
+                                        ErrorCode.ACCESS_TOKEN_INVALID.getDefaultMessage()));
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ApiResponse<Void>> handleBadCredentials(BadCredentialsException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.error(ErrorCode.INVALID_CREDENTIALS.name(),
+                                        ErrorCode.INVALID_CREDENTIALS.getDefaultMessage()));
+    }
+
+    @ExceptionHandler(DisabledException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDisabledAccount(DisabledException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error(ErrorCode.ACCOUNT_DISABLED.name(),
+                        ErrorCode.ACCOUNT_DISABLED.getDefaultMessage()));
+    }
+
+    @ExceptionHandler(LockedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleLockedAccount(LockedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error(ErrorCode.ACCOUNT_BANNED.name(),
+                        ErrorCode.ACCOUNT_BANNED.getDefaultMessage()));
     }
 
     @ExceptionHandler(Exception.class)

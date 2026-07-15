@@ -1,11 +1,15 @@
 package com.hogiabao7725.hotelbooking.service;
 
+import com.hogiabao7725.hotelbooking.dto.request.auth.LoginRequest;
 import com.hogiabao7725.hotelbooking.dto.request.auth.RegisterRequest;
+import com.hogiabao7725.hotelbooking.dto.response.auth.LoginResponse;
 import com.hogiabao7725.hotelbooking.dto.response.auth.RegisterResponse;
 
 public interface AuthService {
 
     RegisterResponse register(RegisterRequest request);
+
+    LoginResponse login(LoginRequest request);
 
     void verifyEmail(String token);
 

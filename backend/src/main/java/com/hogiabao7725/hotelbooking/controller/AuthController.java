@@ -1,7 +1,9 @@
 package com.hogiabao7725.hotelbooking.controller;
 
 import com.hogiabao7725.hotelbooking.dto.common.ApiResponse;
+import com.hogiabao7725.hotelbooking.dto.request.auth.LoginRequest;
 import com.hogiabao7725.hotelbooking.dto.request.auth.RegisterRequest;
+import com.hogiabao7725.hotelbooking.dto.response.auth.LoginResponse;
 import com.hogiabao7725.hotelbooking.dto.response.auth.RegisterResponse;
 import com.hogiabao7725.hotelbooking.service.AuthService;
 import jakarta.validation.Valid;
@@ -22,6 +24,13 @@ public class AuthController {
         RegisterResponse response = authService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Registration successful. Verification email sent.", response));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<LoginResponse>> register(@Valid @RequestBody LoginRequest request) {
+        LoginResponse response = authService.login(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Login successful", response));
     }
 
     @GetMapping("/verify-email")

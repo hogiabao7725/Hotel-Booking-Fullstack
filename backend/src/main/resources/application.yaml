@@ -54,6 +54,9 @@ app:
   verify-email:
     expiration: ${APP_VERIFY_TOKEN_EXPIRATION}
     prefix: ${APP_VERIFY_TOKEN_PREFIX}
+  jwt:
+    secret: ${APP_JWT_SECRET}
+    access-expiration: ${APP_JWT_ACCESS_EXPIRATION}
 
 server:
   port: 8080
