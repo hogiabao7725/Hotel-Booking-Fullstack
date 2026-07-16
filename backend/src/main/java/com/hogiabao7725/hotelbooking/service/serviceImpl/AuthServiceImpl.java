@@ -10,10 +10,7 @@ import com.hogiabao7725.hotelbooking.entity.Profile;
 import com.hogiabao7725.hotelbooking.entity.Role;
 import com.hogiabao7725.hotelbooking.enums.AccountStatus;
 import com.hogiabao7725.hotelbooking.enums.UserRole;
-import com.hogiabao7725.hotelbooking.exception.BusinessException;
-import com.hogiabao7725.hotelbooking.exception.ConflictException;
-import com.hogiabao7725.hotelbooking.exception.ErrorCode;
-import com.hogiabao7725.hotelbooking.exception.ResourceNotFoundException;
+import com.hogiabao7725.hotelbooking.exception.*;
 import com.hogiabao7725.hotelbooking.mapper.AccountMapper;
 import com.hogiabao7725.hotelbooking.mapper.ProfileMapper;
 import com.hogiabao7725.hotelbooking.repository.AccountRepository;
@@ -70,7 +67,7 @@ public class AuthServiceImpl implements AuthService {
         } else {
             // Create a new account
             Role customerRole = roleRepository.findByName(UserRole.ROLE_CUSTOMER)
-                    .orElseThrow(() -> new BusinessException(ErrorCode.ROLE_NOT_FOUND));
+                    .orElseThrow(() -> new SystemException(ErrorCode.ROLE_NOT_FOUND));
 
             account = accountMapper.toEntity(request);
             account.setPasswordHash(passwordEncoder.encode(request.password()));
@@ -126,7 +123,7 @@ public class AuthServiceImpl implements AuthService {
         Account account = accountRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Account", "email", email));
         if (account.getStatus() == AccountStatus.ACTIVE) {
-            throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS);
+            throw new ConflictException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
         String token = oneTimeTokenService.createToken(

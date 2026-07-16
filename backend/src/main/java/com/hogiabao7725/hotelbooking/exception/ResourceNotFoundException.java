@@ -1,6 +1,6 @@
 package com.hogiabao7725.hotelbooking.exception;
 
-public class ResourceNotFoundException extends BusinessException {
+public class ResourceNotFoundException extends BaseException {
 
     public ResourceNotFoundException(String resourceName, String field, Object value) {
         super(
