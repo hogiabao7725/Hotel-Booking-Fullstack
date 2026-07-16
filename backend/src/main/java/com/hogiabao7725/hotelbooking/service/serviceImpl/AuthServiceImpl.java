@@ -110,9 +110,12 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public void verifyEmail(String token) {
-        String email = oneTimeTokenService.consumeToken(token, verifyEmailProperties.prefix());
+        String email = oneTimeTokenService.consumeToken(token, verifyEmailProperties.prefix())
+                .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_ONE_TIME_TOKEN));
+
         Account account = accountRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Account", "email", email));
+
         account.setStatus(AccountStatus.ACTIVE);
         accountRepository.save(account);
     }

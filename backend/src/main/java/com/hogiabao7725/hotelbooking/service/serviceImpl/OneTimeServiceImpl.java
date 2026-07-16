@@ -1,18 +1,17 @@
 package com.hogiabao7725.hotelbooking.service.serviceImpl;
 
-import com.hogiabao7725.hotelbooking.exception.BusinessException;
-import com.hogiabao7725.hotelbooking.exception.ErrorCode;
 import com.hogiabao7725.hotelbooking.service.OneTimeTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class RedisOneTimeServiceImpl implements OneTimeTokenService {
+public class OneTimeServiceImpl implements OneTimeTokenService {
 
     private final StringRedisTemplate redisTemplate;
 
@@ -25,16 +24,9 @@ public class RedisOneTimeServiceImpl implements OneTimeTokenService {
     }
 
     @Override
-    public String consumeToken(String token, String prefix) {
+    public Optional<String> consumeToken(String token, String prefix) {
         String redisKey = prefix + token;
-        String payload = redisTemplate.opsForValue().get(redisKey);
-
-        if (payload == null) {
-            throw new BusinessException(ErrorCode.INVALID_ONE_TIME_TOKEN);
-        }
-
-        redisTemplate.delete(redisKey);
-        return payload;
+        String payload = redisTemplate.opsForValue().getAndDelete(redisKey);
+        return Optional.ofNullable(payload);
     }
-
 }
