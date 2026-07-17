@@ -4,11 +4,15 @@ import com.hogiabao7725.hotelbooking.dto.common.ApiResponse;
 import com.hogiabao7725.hotelbooking.dto.request.auth.LoginRequest;
 import com.hogiabao7725.hotelbooking.dto.request.auth.RegisterRequest;
 import com.hogiabao7725.hotelbooking.dto.response.auth.LoginResponse;
+import com.hogiabao7725.hotelbooking.dto.response.auth.LoginResult;
 import com.hogiabao7725.hotelbooking.dto.response.auth.RegisterResponse;
 import com.hogiabao7725.hotelbooking.service.AuthService;
+import com.hogiabao7725.hotelbooking.service.CookieService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final CookieService cookieService;
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<RegisterResponse>> register(@Valid @RequestBody RegisterRequest request) {
@@ -27,9 +32,17 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
-        LoginResponse response = authService.login(request);
+    public ResponseEntity<ApiResponse<LoginResponse>> login(
+            @Valid @RequestBody LoginRequest request
+    ) {
+        LoginResult result = authService.login(request);
+
+        ResponseCookie refreshCookie = cookieService.setRefreshTokenCookie(result.refreshToken());
+
+        LoginResponse response = new LoginResponse(result.accessToken(), "Bearer");
+
         return ResponseEntity.status(HttpStatus.OK)
+                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
                 .body(ApiResponse.success("Login successful", response));
     }
 

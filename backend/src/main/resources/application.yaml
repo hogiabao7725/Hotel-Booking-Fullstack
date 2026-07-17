@@ -57,6 +57,12 @@ app:
   jwt:
     secret: ${APP_JWT_SECRET}
     access-expiration: ${APP_JWT_ACCESS_EXPIRATION}
+  cookie:
+    refresh:
+      name: ${APP_COOKIE_REFRESH_NAME}
+      secure: ${APP_COOKIE_REFRESH_SECURE}
+      same-site: ${APP_COOKIE_REFRESH_SAME_SITE}
+      path: ${APP_COOKIE_REFRESH_PATH}
 
 server:
   port: 8080
