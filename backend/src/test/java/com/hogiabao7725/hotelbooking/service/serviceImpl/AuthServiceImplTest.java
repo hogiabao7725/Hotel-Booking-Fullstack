@@ -22,7 +22,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.time.Duration;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,7 +48,7 @@ class AuthServiceImplTest {
     private ProfileMapper profileMapper;
 
     @Mock
-    private OneTimeTokenService oneTimeTokenService;
+    private OneTimeTokenService emailVerificationTokenService;
 
     @Mock
     private EmailService emailService;
@@ -100,7 +99,7 @@ class AuthServiceImplTest {
         when(profileMapper.toEntity(request)).thenReturn(profileMock);
         when(accountRepository.save(any(Account.class))).thenReturn(savedAccount);
 
-        when(oneTimeTokenService.createToken("newuser@example.com")).thenReturn("token123");
+        when(emailVerificationTokenService.createToken("newuser@example.com")).thenReturn("token123");
         when(accountMapper.toResponse(savedAccount)).thenReturn(expectedResponse);
 
         // Act
@@ -118,7 +117,7 @@ class AuthServiceImplTest {
         verify(accountMapper).toEntity(request);
         verify(passwordEncoder).encode(request.password());
         verify(profileMapper).toEntity(request);
-        verify(oneTimeTokenService).createToken("newuser@example.com");
+        verify(emailVerificationTokenService).createToken("newuser@example.com");
         verify(emailService).sendVerification("newuser@example.com", "New User", "token123");
         verify(accountMapper).toResponse(savedAccount);
     }
@@ -136,7 +135,7 @@ class AuthServiceImplTest {
                 .isInstanceOf(AppException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ACCOUNT_EMAIL_ALREADY_EXISTS);
         verify(accountRepository).findByEmail(request.email());
-        verifyNoMoreInteractions(accountRepository, roleRepository, passwordEncoder, accountMapper, profileMapper, oneTimeTokenService, emailService);
+        verifyNoMoreInteractions(accountRepository, roleRepository, passwordEncoder, accountMapper, profileMapper, emailVerificationTokenService, emailService);
     }
 
     @Test
@@ -152,7 +151,7 @@ class AuthServiceImplTest {
         when(passwordEncoder.encode(request.password())).thenReturn("encodedNewPassword");
         when(accountRepository.save(existingInactiveAccount)).thenReturn(savedAccount);
 
-        when(oneTimeTokenService.createToken("inactiveuser@example.com")).thenReturn("newToken123");
+        when(emailVerificationTokenService.createToken("inactiveuser@example.com")).thenReturn("newToken123");
         when(accountMapper.toResponse(savedAccount)).thenReturn(expectedResponse);
 
         // Act
@@ -170,7 +169,7 @@ class AuthServiceImplTest {
 
         verify(accountRepository).findByEmail(request.email());
         verify(passwordEncoder).encode(request.password());
-        verify(oneTimeTokenService).createToken("inactiveuser@example.com");
+        verify(emailVerificationTokenService).createToken("inactiveuser@example.com");
         verify(emailService).sendVerification("inactiveuser@example.com", "Updated Name", "newToken123");
         verify(accountMapper).toResponse(savedAccount);
 

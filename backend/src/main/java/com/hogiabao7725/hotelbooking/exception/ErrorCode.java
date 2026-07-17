@@ -32,6 +32,6 @@ public enum ErrorCode {
 
     ErrorCode(String defaultMessage, HttpStatus httpStatus) {
         this.defaultMessage = defaultMessage;
-        this.httpStatus = httpStatus;;
+        this.httpStatus = httpStatus;
     }
 }

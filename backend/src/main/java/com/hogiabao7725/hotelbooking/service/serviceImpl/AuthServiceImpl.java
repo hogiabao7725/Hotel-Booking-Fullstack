@@ -39,7 +39,7 @@ public class AuthServiceImpl implements AuthService {
     private final AccountMapper accountMapper;
     private final ProfileMapper profileMapper;
 
-    private final OneTimeTokenService oneTimeTokenService;
+    private final OneTimeTokenService emailVerificationTokenService;
     private final EmailService emailService;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
@@ -80,7 +80,7 @@ public class AuthServiceImpl implements AuthService {
         account = accountRepository.save(account);
 
         // Generate verification token and send email
-        String token = oneTimeTokenService.createToken(account.getEmail());
+        String token = emailVerificationTokenService.createToken(account.getEmail());
         emailService.sendVerification(account.getEmail(), account.getProfile().getFullName(), token);
 
         return accountMapper.toResponse(account);
@@ -103,7 +103,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public void verifyEmail(String token) {
-        String email = oneTimeTokenService.consumeToken(token)
+        String email = emailVerificationTokenService.consumeToken(token)
                 .orElseThrow(() -> new AppException(ErrorCode.AUTH_INVALID_ONE_TIME_TOKEN));
         Account account = accountRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.AUTH_INVALID_ONE_TIME_TOKEN));
@@ -122,6 +122,8 @@ public class AuthServiceImpl implements AuthService {
         if (account.getStatus() == AccountStatus.BANNED) {
             throw new AppException(ErrorCode.ACCOUNT_BANNED);
         }
+        
+        throw new AppException(ErrorCode.AUTH_INVALID_ONE_TIME_TOKEN);
     }
 
     @Override
@@ -129,7 +131,7 @@ public class AuthServiceImpl implements AuthService {
     public void resendVerification(String email) { // Only for register feature
         accountRepository.findByEmailAndStatus(email, AccountStatus.INACTIVE)
                 .ifPresent(account -> {
-                    String token = oneTimeTokenService.createToken(account.getEmail());
+                    String token = emailVerificationTokenService.createToken(account.getEmail());
 
                     emailService.sendVerification(
                             account.getEmail(),

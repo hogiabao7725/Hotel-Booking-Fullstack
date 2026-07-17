@@ -13,7 +13,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
-@RequiredArgsConstructor
 public class AuthConfig {
 
     @Bean
@@ -25,8 +24,6 @@ public class AuthConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) {
         return authenticationConfiguration.getAuthenticationManager();
     }
-
-    private final UserDetailsService userDetailsService;
 
     @Bean
     public DaoAuthenticationProvider daoAuthenticationProvider(
