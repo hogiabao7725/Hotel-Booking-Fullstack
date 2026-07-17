@@ -2,8 +2,8 @@ package com.hogiabao7725.hotelbooking.service.serviceImpl;
 
 import com.hogiabao7725.hotelbooking.config.properties.FrontendProperties;
 import com.hogiabao7725.hotelbooking.config.properties.MailProperties;
+import com.hogiabao7725.hotelbooking.exception.AppException;
 import com.hogiabao7725.hotelbooking.exception.ErrorCode;
-import com.hogiabao7725.hotelbooking.exception.SystemException;
 import com.hogiabao7725.hotelbooking.service.EmailService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -47,7 +47,7 @@ public class EmailServiceImpl implements EmailService {
 
             mailSender.send(message);
         } catch (MessagingException ex) {
-            throw new SystemException(ErrorCode.EMAIL_SENDING_FAILED, ex);
+            throw new AppException(ErrorCode.EMAIL_SENDING_FAILED, ex);
         }
     }
 }

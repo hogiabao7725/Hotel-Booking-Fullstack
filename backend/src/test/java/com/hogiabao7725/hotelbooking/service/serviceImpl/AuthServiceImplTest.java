@@ -1,6 +1,5 @@
 package com.hogiabao7725.hotelbooking.service.serviceImpl;
 
-import com.hogiabao7725.hotelbooking.config.properties.VerifyEmailProperties;
 import com.hogiabao7725.hotelbooking.dto.request.auth.RegisterRequest;
 import com.hogiabao7725.hotelbooking.dto.response.auth.RegisterResponse;
 import com.hogiabao7725.hotelbooking.entity.Account;
@@ -8,7 +7,7 @@ import com.hogiabao7725.hotelbooking.entity.Profile;
 import com.hogiabao7725.hotelbooking.entity.Role;
 import com.hogiabao7725.hotelbooking.enums.AccountStatus;
 import com.hogiabao7725.hotelbooking.enums.UserRole;
-import com.hogiabao7725.hotelbooking.exception.ConflictException;
+import com.hogiabao7725.hotelbooking.exception.AppException;
 import com.hogiabao7725.hotelbooking.exception.ErrorCode;
 import com.hogiabao7725.hotelbooking.mapper.AccountMapper;
 import com.hogiabao7725.hotelbooking.mapper.ProfileMapper;
@@ -54,9 +53,6 @@ class AuthServiceImplTest {
 
     @Mock
     private EmailService emailService;
-
-    @Mock
-    private VerifyEmailProperties verifyEmailProperties;
 
     @InjectMocks
     private AuthServiceImpl authService;
@@ -104,9 +100,7 @@ class AuthServiceImplTest {
         when(profileMapper.toEntity(request)).thenReturn(profileMock);
         when(accountRepository.save(any(Account.class))).thenReturn(savedAccount);
 
-        when(verifyEmailProperties.prefix()).thenReturn("verify:");
-        when(verifyEmailProperties.expiration()).thenReturn(Duration.ofMinutes(15));
-        when(oneTimeTokenService.createToken("newuser@example.com", "verify:", Duration.ofMinutes(15))).thenReturn("token123");
+        when(oneTimeTokenService.createToken("newuser@example.com")).thenReturn("token123");
         when(accountMapper.toResponse(savedAccount)).thenReturn(expectedResponse);
 
         // Act
@@ -124,8 +118,7 @@ class AuthServiceImplTest {
         verify(accountMapper).toEntity(request);
         verify(passwordEncoder).encode(request.password());
         verify(profileMapper).toEntity(request);
-        verify(accountRepository).save(any(Account.class));
-        verify(oneTimeTokenService).createToken("newuser@example.com", "verify:", Duration.ofMinutes(15));
+        verify(oneTimeTokenService).createToken("newuser@example.com");
         verify(emailService).sendVerification("newuser@example.com", "New User", "token123");
         verify(accountMapper).toResponse(savedAccount);
     }
@@ -140,8 +133,8 @@ class AuthServiceImplTest {
 
         // Act & Assert
         assertThatThrownBy(() -> authService.register(request))
-                .isInstanceOf(ConflictException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.EMAIL_ALREADY_EXISTS);
+                .isInstanceOf(AppException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ACCOUNT_EMAIL_ALREADY_EXISTS);
         verify(accountRepository).findByEmail(request.email());
         verifyNoMoreInteractions(accountRepository, roleRepository, passwordEncoder, accountMapper, profileMapper, oneTimeTokenService, emailService);
     }
@@ -159,9 +152,7 @@ class AuthServiceImplTest {
         when(passwordEncoder.encode(request.password())).thenReturn("encodedNewPassword");
         when(accountRepository.save(existingInactiveAccount)).thenReturn(savedAccount);
 
-        when(verifyEmailProperties.prefix()).thenReturn("verify:");
-        when(verifyEmailProperties.expiration()).thenReturn(Duration.ofMinutes(15));
-        when(oneTimeTokenService.createToken("inactiveuser@example.com", "verify:", Duration.ofMinutes(15))).thenReturn("newToken123");
+        when(oneTimeTokenService.createToken("inactiveuser@example.com")).thenReturn("newToken123");
         when(accountMapper.toResponse(savedAccount)).thenReturn(expectedResponse);
 
         // Act
@@ -179,8 +170,7 @@ class AuthServiceImplTest {
 
         verify(accountRepository).findByEmail(request.email());
         verify(passwordEncoder).encode(request.password());
-        verify(accountRepository).save(existingInactiveAccount);
-        verify(oneTimeTokenService).createToken("inactiveuser@example.com", "verify:", Duration.ofMinutes(15));
+        verify(oneTimeTokenService).createToken("inactiveuser@example.com");
         verify(emailService).sendVerification("inactiveuser@example.com", "Updated Name", "newToken123");
         verify(accountMapper).toResponse(savedAccount);
 
