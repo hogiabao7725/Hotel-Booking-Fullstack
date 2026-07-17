@@ -29,12 +29,14 @@ public class JwtTokenProvider {
      */
     public String generateToken(Authentication authentication) {
         String email = authentication.getName();
+        String role = authentication.getAuthorities().iterator().next().getAuthority();
 
         Instant now = Instant.now();
         Instant expiration = now.plus(jwtProperties.accessExpiration());
 
         return Jwts.builder()
                 .subject(email)
+                .claim("role", role)
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(expiration))
                 .signWith(signingKey)

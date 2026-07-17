@@ -1,5 +1,6 @@
 package com.hogiabao7725.hotelbooking.security.jwt;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -9,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -19,6 +22,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -48,14 +52,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // If token exists
         // Try to validate token and handle error if any
         try {
-            String email = jwtTokenProvider.parseToken(jwtToken).getSubject(); // throw error here
+            Claims claims = jwtTokenProvider.parseToken(jwtToken); // throw error here
+            String email = claims.getSubject();
+            String role = claims.get("role", String.class);
 
             if (StringUtils.hasText(email) && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+                List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
                 UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails.getUsername(), null, userDetails.getAuthorities()
-                        );
+                        new UsernamePasswordAuthenticationToken(email, null, authorities);
 
                 // Save additional information about the request that performed the authentication.
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
