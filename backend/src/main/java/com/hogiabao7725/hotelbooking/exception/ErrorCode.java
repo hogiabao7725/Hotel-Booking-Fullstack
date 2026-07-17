@@ -1,37 +1,37 @@
 package com.hogiabao7725.hotelbooking.exception;
 
 import lombok.Getter;
+import org.springframework.http.HttpStatus;
 
 @Getter
 public enum ErrorCode {
 
-    // 400 - Bad Request
-    VALIDATION_FAILED("Invalid request data"),
-    INVALID_ONE_TIME_TOKEN("Token invalid or expired"),
+    // System, Common
+    INVALID_INPUT("Invalid input parameters", HttpStatus.BAD_REQUEST),
+    RESOURCE_NOT_FOUND("Resource not found", HttpStatus.NOT_FOUND),
+    INTERNAL_SERVER_ERROR("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR),
 
-    // 401 - Unauthorized
-    INVALID_CREDENTIALS("Email or password is incorrect"),
-    ACCESS_TOKEN_EXPIRED("Access token expired"),
-    ACCESS_TOKEN_INVALID("Invalid access token"),
+    // Auth
+    AUTH_INVALID_CREDENTIALS("Invalid email or password", HttpStatus.UNAUTHORIZED),
+    AUTH_ACCESS_TOKEN_EXPIRED("Access token has expired", HttpStatus.UNAUTHORIZED),
+    AUTH_ACCESS_TOKEN_INVALID("Invalid access token", HttpStatus.UNAUTHORIZED),
+    AUTH_INVALID_ONE_TIME_TOKEN("Verification token is invalid or expired", HttpStatus.BAD_REQUEST),
 
-    // 403 - Forbidden
-    ACCOUNT_DISABLED("Account is inactive or deleted."),
-    ACCOUNT_BANNED("Account has been banned."),
+    // Account
+    ACCOUNT_EMAIL_ALREADY_EXISTS("Email is already in use", HttpStatus.CONFLICT),
+    ACCOUNT_ALREADY_ACTIVE("Account is already active", HttpStatus.CONFLICT),
+    ACCOUNT_INACTIVE("Account is inactive", HttpStatus.FORBIDDEN),
+    ACCOUNT_BANNED("Account has been banned", HttpStatus.FORBIDDEN),
+    ACCOUNT_ROLE_NOT_FOUND("Required role not found", HttpStatus.INTERNAL_SERVER_ERROR),
 
-    // 404 - Not Found
-    RESOURCE_NOT_FOUND("Resource not found"),
-
-    // 409 - Conflict
-    EMAIL_ALREADY_EXISTS("Email is already in use"),
-
-    // 500 - Internal server
-    EMAIL_SENDING_FAILED("Failed to send email"),
-    ROLE_NOT_FOUND("Role not found"),
-    INTERNAL_ERROR("Internal server error");
+    // Infra
+    EMAIL_SENDING_FAILED("Failed to send email", HttpStatus.INTERNAL_SERVER_ERROR);
 
     private final String defaultMessage;
+    private final HttpStatus httpStatus;
 
-    ErrorCode(String defaultMessage) {
+    ErrorCode(String defaultMessage, HttpStatus httpStatus) {
         this.defaultMessage = defaultMessage;
+        this.httpStatus = httpStatus;;
     }
 }
