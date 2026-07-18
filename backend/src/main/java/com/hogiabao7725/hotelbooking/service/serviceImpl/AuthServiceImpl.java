@@ -36,18 +36,20 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
+    private final RefreshTokenService refreshTokenService;
+    private final OneTimeTokenService emailVerificationTokenService;
+    private final EmailService emailService;
+
     private final AccountRepository accountRepository;
     private final RoleRepository roleRepository;
-    private final PasswordEncoder passwordEncoder;
+
     private final AccountMapper accountMapper;
     private final ProfileMapper profileMapper;
 
-    private final OneTimeTokenService emailVerificationTokenService;
-    private final EmailService emailService;
-    private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
-    private final RefreshTokenService refreshTokenService;
+    private final PasswordEncoder passwordEncoder;
     private final UserDetailsService userDetailsService;
+    private final AuthenticationManager authenticationManager;
 
     @Override
     @Transactional
@@ -112,22 +114,17 @@ public class AuthServiceImpl implements AuthService {
         Account account = accountRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.AUTH_INVALID_ONE_TIME_TOKEN));
 
-        // White list
-        if (account.getStatus() == AccountStatus.INACTIVE) {
-            account.setStatus(AccountStatus.ACTIVE);
-            accountRepository.save(account);
-            return;
+        switch (account.getStatus()) {
+            // White list
+            case INACTIVE -> {
+                account.setStatus(AccountStatus.ACTIVE);
+                accountRepository.save(account);
+            }
+            // Black list
+            case ACTIVE -> throw new AppException(ErrorCode.ACCOUNT_ALREADY_ACTIVE);
+            case BANNED -> throw new AppException(ErrorCode.ACCOUNT_BANNED);
+            default -> throw new AppException(ErrorCode.AUTH_INVALID_ONE_TIME_TOKEN);
         }
-
-        // Black list
-        if (account.getStatus() == AccountStatus.ACTIVE) {
-            throw new AppException(ErrorCode.ACCOUNT_ALREADY_ACTIVE);
-        }
-        if (account.getStatus() == AccountStatus.BANNED) {
-            throw new AppException(ErrorCode.ACCOUNT_BANNED);
-        }
-        
-        throw new AppException(ErrorCode.AUTH_INVALID_ONE_TIME_TOKEN);
     }
 
     @Override
@@ -164,7 +161,6 @@ public class AuthServiceImpl implements AuthService {
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                 userDetails, null, userDetails.getAuthorities()
         );
-
         String newAccessToken = jwtTokenProvider.generateToken(authentication);
         String newRefreshToken = refreshTokenService.create(email);
         return new  AuthResponse(newAccessToken, "Bearer", newRefreshToken);
