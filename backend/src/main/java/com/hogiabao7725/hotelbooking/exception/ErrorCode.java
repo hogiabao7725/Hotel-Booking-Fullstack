@@ -17,6 +17,8 @@ public enum ErrorCode {
     AUTH_ACCESS_TOKEN_INVALID("Invalid access token", HttpStatus.UNAUTHORIZED),
     AUTH_REFRESH_TOKEN_INVALID("Refresh token is invalid or expired", HttpStatus.UNAUTHORIZED),
     AUTH_INVALID_ONE_TIME_TOKEN("Verification token is invalid or expired", HttpStatus.BAD_REQUEST),
+    AUTH_UNAUTHORIZED("Full authentication is required to access this resource", HttpStatus.UNAUTHORIZED),
+    AUTH_FORBIDDEN("You do not have permission to access this resource", HttpStatus.FORBIDDEN),
 
     // Account
     ACCOUNT_EMAIL_ALREADY_EXISTS("Email is already in use", HttpStatus.CONFLICT),
