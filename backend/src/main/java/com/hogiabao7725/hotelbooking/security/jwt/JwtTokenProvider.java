@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 
@@ -54,5 +55,17 @@ public class JwtTokenProvider {
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
+    }
+
+    /**
+     * Calculates the remaining lifetime of the JWT token.
+     * <p>
+     * Returns Duration. ZERO if token is expired.
+     */
+    public Duration getRemainingTtl(String token) {
+        Claims claims = parseToken(token);
+        Date expiration = claims.getExpiration();
+        long diff = expiration.getTime() - System.currentTimeMillis();
+        return diff > 0 ? Duration.ofMillis(diff) : Duration.ZERO;
     }
 }

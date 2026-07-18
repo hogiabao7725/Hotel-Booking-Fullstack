@@ -15,6 +15,10 @@ import com.hogiabao7725.hotelbooking.repository.AccountRepository;
 import com.hogiabao7725.hotelbooking.repository.RoleRepository;
 import com.hogiabao7725.hotelbooking.service.EmailService;
 import com.hogiabao7725.hotelbooking.service.OneTimeTokenService;
+import com.hogiabao7725.hotelbooking.service.RefreshTokenService;
+import com.hogiabao7725.hotelbooking.service.TokenBlacklistService;
+import com.hogiabao7725.hotelbooking.security.jwt.JwtTokenProvider;
+import com.hogiabao7725.hotelbooking.dto.request.auth.RefreshTokenRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -52,6 +56,18 @@ class AuthServiceImplTest {
 
     @Mock
     private EmailService emailService;
+
+    @Mock
+    private RefreshTokenService refreshTokenService;
+
+    @Mock
+    private JwtTokenProvider jwtTokenProvider;
+
+    @Mock
+    private TokenBlacklistService tokenBlacklistService;
+
+    @Mock
+    private jakarta.servlet.http.HttpServletRequest httpServletRequest;
 
     @InjectMocks
     private AuthServiceImpl authService;
@@ -174,5 +190,25 @@ class AuthServiceImplTest {
         verify(accountMapper).toResponse(savedAccount);
 
         verifyNoInteractions(roleRepository, profileMapper);
+    }
+
+    @Test
+    void logout_shouldRevokeRefreshTokenAndBlacklistAccessToken_whenAccessTokenIsValid() {
+        // Arrange
+        String refreshToken = "mock-refresh-token";
+        String accessToken = "mock-access-token";
+        String authHeader = "Bearer " + accessToken;
+        RefreshTokenRequest request = new RefreshTokenRequest(refreshToken);
+        java.time.Duration remainingTtl = java.time.Duration.ofMinutes(10);
+
+        when(httpServletRequest.getHeader("Authorization")).thenReturn(authHeader);
+        when(jwtTokenProvider.getRemainingTtl(accessToken)).thenReturn(remainingTtl);
+
+        // Act
+        authService.logout(request);
+
+        // Assert
+        verify(refreshTokenService).revoke(refreshToken);
+        verify(tokenBlacklistService).add(accessToken, remainingTtl);
     }
 }

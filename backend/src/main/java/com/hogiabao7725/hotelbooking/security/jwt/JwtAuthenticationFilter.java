@@ -13,13 +13,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
+import com.hogiabao7725.hotelbooking.service.TokenBlacklistService;
 
 import java.io.IOException;
 import java.util.List;
@@ -29,7 +28,7 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
-    private final UserDetailsService userDetailsService;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @Qualifier("handlerExceptionResolver")
     private final HandlerExceptionResolver handlerExceptionResolver;
@@ -53,6 +52,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // Try to validate token and handle error if any
         try {
             Claims claims = jwtTokenProvider.parseToken(jwtToken); // throw error here
+
+            if (tokenBlacklistService.contains(jwtToken)) {
+                SecurityContextHolder.clearContext();
+                handlerExceptionResolver
+                        .resolveException(request, response, null, new JwtException("Token is blacklisted"));
+            }
+
             String email = claims.getSubject();
             String role = claims.get("role", String.class);
 

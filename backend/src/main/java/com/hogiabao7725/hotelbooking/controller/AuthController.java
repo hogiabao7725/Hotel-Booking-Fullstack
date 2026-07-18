@@ -2,7 +2,7 @@ package com.hogiabao7725.hotelbooking.controller;
 
 import com.hogiabao7725.hotelbooking.dto.common.ApiResponse;
 import com.hogiabao7725.hotelbooking.dto.request.auth.LoginRequest;
-import com.hogiabao7725.hotelbooking.dto.request.auth.RefreshRequest;
+import com.hogiabao7725.hotelbooking.dto.request.auth.RefreshTokenRequest;
 import com.hogiabao7725.hotelbooking.dto.request.auth.RegisterRequest;
 import com.hogiabao7725.hotelbooking.dto.response.auth.AuthResponse;
 import com.hogiabao7725.hotelbooking.dto.response.auth.RegisterResponse;
@@ -49,9 +49,15 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<ApiResponse<AuthResponse>> refresh(@RequestBody @Valid RefreshRequest request) {
+    public ResponseEntity<ApiResponse<AuthResponse>> refresh(@RequestBody @Valid RefreshTokenRequest request) {
         AuthResponse response = authService.refreshToken(request);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiResponse.success("Token refreshed successfully", response));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<Void>> logout(@RequestBody @Valid RefreshTokenRequest request) {
+        authService.logout(request);
+        return ResponseEntity.ok(ApiResponse.success("Logout successful"));
     }
 }

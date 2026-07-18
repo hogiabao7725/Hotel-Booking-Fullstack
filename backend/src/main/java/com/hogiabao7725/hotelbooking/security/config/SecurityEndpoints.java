@@ -6,7 +6,11 @@ public final class SecurityEndpoints {
     }
 
     public static final String[] PUBLIC_ENDPOINTS = {
-            "/auth/**",
+            "/auth/register",
+            "/auth/login",
+            "/auth/verify-email",
+            "/auth/resend-verification",
+            "/auth/refresh",
             "/health",
             "/v3/api-docs/**",
             "/swagger-ui/**",

@@ -57,9 +57,11 @@ app:
   jwt:
     secret: ${APP_JWT_SECRET}
     access-expiration: ${APP_JWT_ACCESS_EXPIRATION}
+    access-blacklist-prefix: ${APP_JWT_ACCESS_BLACK_LIST_PREFIX}
   refresh-token:
     prefix: ${APP_REFRESH_TOKEN_PREFIX}
     expiration: ${APP_REFRESH_TOKEN_EXPIRATION}
+
 server:
   port: 8080
   servlet:
