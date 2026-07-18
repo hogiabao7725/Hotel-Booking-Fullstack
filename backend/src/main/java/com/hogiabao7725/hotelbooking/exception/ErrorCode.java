@@ -15,6 +15,7 @@ public enum ErrorCode {
     AUTH_INVALID_CREDENTIALS("Invalid email or password", HttpStatus.UNAUTHORIZED),
     AUTH_ACCESS_TOKEN_EXPIRED("Access token has expired", HttpStatus.UNAUTHORIZED),
     AUTH_ACCESS_TOKEN_INVALID("Invalid access token", HttpStatus.UNAUTHORIZED),
+    AUTH_REFRESH_TOKEN_INVALID("Refresh token is invalid or expired", HttpStatus.UNAUTHORIZED),
     AUTH_INVALID_ONE_TIME_TOKEN("Verification token is invalid or expired", HttpStatus.BAD_REQUEST),
 
     // Account

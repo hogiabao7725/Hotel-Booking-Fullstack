@@ -1,8 +1,9 @@
 package com.hogiabao7725.hotelbooking.service.serviceImpl;
 
 import com.hogiabao7725.hotelbooking.dto.request.auth.LoginRequest;
+import com.hogiabao7725.hotelbooking.dto.request.auth.RefreshRequest;
 import com.hogiabao7725.hotelbooking.dto.request.auth.RegisterRequest;
-import com.hogiabao7725.hotelbooking.dto.response.auth.LoginResult;
+import com.hogiabao7725.hotelbooking.dto.response.auth.AuthResponse;
 import com.hogiabao7725.hotelbooking.dto.response.auth.RegisterResponse;
 import com.hogiabao7725.hotelbooking.entity.Account;
 import com.hogiabao7725.hotelbooking.entity.Profile;
@@ -24,6 +25,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +47,7 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenService refreshTokenService;
+    private final UserDetailsService userDetailsService;
 
     @Override
     @Transactional
@@ -88,7 +92,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional(readOnly = true)
-    public LoginResult login(LoginRequest request) {
+    public AuthResponse login(LoginRequest request) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.email(), request.password())
         );
@@ -97,7 +101,7 @@ public class AuthServiceImpl implements AuthService {
         String accessToken = jwtTokenProvider.generateToken(authentication);
         // refresh token
         String refreshToken = refreshTokenService.create(authentication.getName());
-        return new LoginResult(accessToken, refreshToken);
+        return new AuthResponse(accessToken,"Bearer", refreshToken);
     }
 
     @Override
@@ -139,5 +143,30 @@ public class AuthServiceImpl implements AuthService {
                             token
                     );
                 });
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public AuthResponse refreshToken(RefreshRequest request) {
+        String email = refreshTokenService.getPayload(request.refreshToken())
+                .orElseThrow(() -> new AppException(ErrorCode.AUTH_REFRESH_TOKEN_INVALID));
+
+        refreshTokenService.revoke(request.refreshToken());
+
+        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+        if (!userDetails.isEnabled()) {
+            throw new AppException(ErrorCode.ACCOUNT_INACTIVE);
+        }
+        if (!userDetails.isAccountNonLocked()) {
+            throw new AppException(ErrorCode.ACCOUNT_BANNED);
+        }
+
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                userDetails, null, userDetails.getAuthorities()
+        );
+
+        String newAccessToken = jwtTokenProvider.generateToken(authentication);
+        String newRefreshToken = refreshTokenService.create(email);
+        return new  AuthResponse(newAccessToken, "Bearer", newRefreshToken);
     }
 }

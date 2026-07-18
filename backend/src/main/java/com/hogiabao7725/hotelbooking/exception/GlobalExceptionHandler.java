@@ -4,7 +4,6 @@ import com.hogiabao7725.hotelbooking.dto.common.ApiResponse;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -35,6 +34,7 @@ public class GlobalExceptionHandler {
     // ==================================
     // Data Validation Exception (@Valid)
     // ==================================
+    @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<List<String>>> handleValidation(MethodArgumentNotValidException ex) {
         List<String> errors = ex.getFieldErrors()
                 .stream()
@@ -82,6 +82,7 @@ public class GlobalExceptionHandler {
     // ===================
     // Fallback Exception
     // ===================
+    @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleAll(Exception ex) {
         return buildResponse(ErrorCode.INTERNAL_SERVER_ERROR);
     }
