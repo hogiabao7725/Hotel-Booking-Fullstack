@@ -11,8 +11,8 @@ import com.hogiabao7725.hotelbooking.exception.AppException;
 import com.hogiabao7725.hotelbooking.exception.ErrorCode;
 import com.hogiabao7725.hotelbooking.mapper.AccountMapper;
 import com.hogiabao7725.hotelbooking.mapper.ProfileMapper;
-import com.hogiabao7725.hotelbooking.repository.AccountRepository;
-import com.hogiabao7725.hotelbooking.repository.RoleRepository;
+import com.hogiabao7725.hotelbooking.service.AccountService;
+import com.hogiabao7725.hotelbooking.service.RoleService;
 import com.hogiabao7725.hotelbooking.service.EmailService;
 import com.hogiabao7725.hotelbooking.service.OneTimeTokenService;
 import com.hogiabao7725.hotelbooking.service.RefreshTokenService;
@@ -37,10 +37,10 @@ import static org.mockito.Mockito.*;
 class AuthServiceImplTest {
 
     @Mock
-    private AccountRepository accountRepository;
+    private AccountService accountService;
 
     @Mock
-    private RoleRepository roleRepository;
+    private RoleService roleService;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -108,12 +108,12 @@ class AuthServiceImplTest {
 
         RegisterResponse expectedResponse = new RegisterResponse(1L, "newuser@example.com", "New User", "ROLE_CUSTOMER");
 
-        when(accountRepository.findByEmail(request.email())).thenReturn(Optional.empty());
-        when(roleRepository.findByName(UserRole.ROLE_CUSTOMER)).thenReturn(Optional.of(customerRole));
+        when(accountService.findByEmail(request.email())).thenReturn(Optional.empty());
+        when(roleService.getByName(UserRole.ROLE_CUSTOMER)).thenReturn(customerRole);
         when(accountMapper.toEntity(request)).thenReturn(accountMock);
         when(passwordEncoder.encode(request.password())).thenReturn("encodedPassword");
         when(profileMapper.toEntity(request)).thenReturn(profileMock);
-        when(accountRepository.save(any(Account.class))).thenReturn(savedAccount);
+        when(accountService.save(any(Account.class))).thenReturn(savedAccount);
 
         when(emailVerificationTokenService.createToken("newuser@example.com")).thenReturn("token123");
         when(accountMapper.toResponse(savedAccount)).thenReturn(expectedResponse);
@@ -128,8 +128,8 @@ class AuthServiceImplTest {
         assertThat(result.fullName()).isEqualTo(expectedResponse.fullName());
         assertThat(result.role()).isEqualTo(expectedResponse.role());
 
-        verify(accountRepository).findByEmail(request.email());
-        verify(roleRepository).findByName(UserRole.ROLE_CUSTOMER);
+        verify(accountService).findByEmail(request.email());
+        verify(roleService).getByName(UserRole.ROLE_CUSTOMER);
         verify(accountMapper).toEntity(request);
         verify(passwordEncoder).encode(request.password());
         verify(profileMapper).toEntity(request);
@@ -144,14 +144,14 @@ class AuthServiceImplTest {
         RegisterRequest request = createRegisterRequest("activeuser@example.com", "Active User");
         Account activeAccount = createAccount(1L, request.email(), AccountStatus.ACTIVE, null);
 
-        when(accountRepository.findByEmail(request.email())).thenReturn(Optional.of(activeAccount));
+        when(accountService.findByEmail(request.email())).thenReturn(Optional.of(activeAccount));
 
         // Act & Assert
         assertThatThrownBy(() -> authService.register(request))
                 .isInstanceOf(AppException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ACCOUNT_EMAIL_ALREADY_EXISTS);
-        verify(accountRepository).findByEmail(request.email());
-        verifyNoMoreInteractions(accountRepository, roleRepository, passwordEncoder, accountMapper, profileMapper, emailVerificationTokenService, emailService);
+        verify(accountService).findByEmail(request.email());
+        verifyNoMoreInteractions(accountService, roleService, passwordEncoder, accountMapper, profileMapper, emailVerificationTokenService, emailService);
     }
 
     @Test
@@ -163,9 +163,9 @@ class AuthServiceImplTest {
         Account savedAccount = createAccount(1L, "inactiveuser@example.com", AccountStatus.INACTIVE, oldProfile);
         RegisterResponse expectedResponse = new RegisterResponse(1L, "inactiveuser@example.com", "Updated Name", "ROLE_CUSTOMER");
 
-        when(accountRepository.findByEmail(request.email())).thenReturn(Optional.of(existingInactiveAccount));
+        when(accountService.findByEmail(request.email())).thenReturn(Optional.of(existingInactiveAccount));
         when(passwordEncoder.encode(request.password())).thenReturn("encodedNewPassword");
-        when(accountRepository.save(existingInactiveAccount)).thenReturn(savedAccount);
+        when(accountService.save(existingInactiveAccount)).thenReturn(savedAccount);
 
         when(emailVerificationTokenService.createToken("inactiveuser@example.com")).thenReturn("newToken123");
         when(accountMapper.toResponse(savedAccount)).thenReturn(expectedResponse);
@@ -183,13 +183,13 @@ class AuthServiceImplTest {
         assertThat(existingInactiveAccount.getPasswordHash()).isEqualTo("encodedNewPassword");
         assertThat(existingInactiveAccount.getProfile().getFullName()).isEqualTo("Updated Name");
 
-        verify(accountRepository).findByEmail(request.email());
+        verify(accountService).findByEmail(request.email());
         verify(passwordEncoder).encode(request.password());
         verify(emailVerificationTokenService).createToken("inactiveuser@example.com");
         verify(emailService).sendVerification("inactiveuser@example.com", "Updated Name", "newToken123");
         verify(accountMapper).toResponse(savedAccount);
 
-        verifyNoInteractions(roleRepository, profileMapper);
+        verifyNoInteractions(roleService, profileMapper);
     }
 
     @Test

@@ -16,11 +16,7 @@ import com.hogiabao7725.hotelbooking.mapper.ProfileMapper;
 import com.hogiabao7725.hotelbooking.repository.AccountRepository;
 import com.hogiabao7725.hotelbooking.repository.RoleRepository;
 import com.hogiabao7725.hotelbooking.security.jwt.JwtTokenProvider;
-import com.hogiabao7725.hotelbooking.service.AuthService;
-import com.hogiabao7725.hotelbooking.service.EmailService;
-import com.hogiabao7725.hotelbooking.service.OneTimeTokenService;
-import com.hogiabao7725.hotelbooking.service.RefreshTokenService;
-import com.hogiabao7725.hotelbooking.service.TokenBlacklistService;
+import com.hogiabao7725.hotelbooking.service.*;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -44,9 +40,8 @@ public class AuthServiceImpl implements AuthService {
     private final RefreshTokenService refreshTokenService;
     private final OneTimeTokenService emailVerificationTokenService;
     private final EmailService emailService;
-
-    private final AccountRepository accountRepository;
-    private final RoleRepository roleRepository;
+    private final AccountService accountService;
+    private final RoleService roleService;
 
     private final AccountMapper accountMapper;
     private final ProfileMapper profileMapper;
@@ -61,7 +56,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public RegisterResponse register(RegisterRequest request) {
-        Optional<Account> existingAccountOpt = accountRepository.findByEmail(request.email());
+        Optional<Account> existingAccountOpt = accountService.findByEmail(request.email());
         Account account;
 
         if (existingAccountOpt.isPresent()) {
@@ -79,8 +74,7 @@ public class AuthServiceImpl implements AuthService {
             profile.setFullName(request.fullName());
         } else {
             // Create a new account
-            Role customerRole = roleRepository.findByName(UserRole.ROLE_CUSTOMER)
-                    .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_ROLE_NOT_FOUND));
+            Role customerRole = roleService.getByName(UserRole.ROLE_CUSTOMER);
 
             account = accountMapper.toEntity(request);
             account.setPasswordHash(passwordEncoder.encode(request.password()));
@@ -90,7 +84,7 @@ public class AuthServiceImpl implements AuthService {
             Profile profile = profileMapper.toEntity(request);
             account.setProfile(profile);
         }
-        account = accountRepository.save(account);
+        account = accountService.save(account);
 
         // Generate verification token and send email
         String token = emailVerificationTokenService.createToken(account.getEmail());
@@ -118,14 +112,14 @@ public class AuthServiceImpl implements AuthService {
     public void verifyEmail(String token) {
         String email = emailVerificationTokenService.consumeToken(token)
                 .orElseThrow(() -> new AppException(ErrorCode.AUTH_INVALID_ONE_TIME_TOKEN));
-        Account account = accountRepository.findByEmail(email)
+        Account account = accountService.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.AUTH_INVALID_ONE_TIME_TOKEN));
 
         switch (account.getStatus()) {
             // White list
             case INACTIVE -> {
                 account.setStatus(AccountStatus.ACTIVE);
-                accountRepository.save(account);
+                accountService.save(account);
             }
             // Black list
             case ACTIVE -> throw new AppException(ErrorCode.ACCOUNT_ALREADY_ACTIVE);
@@ -137,7 +131,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional(readOnly = true)
     public void resendVerification(String email) { // Only for register feature
-        accountRepository.findByEmailAndStatus(email, AccountStatus.INACTIVE)
+        accountService.findByEmailAndStatus(email, AccountStatus.INACTIVE)
                 .ifPresent(account -> {
                     String token = emailVerificationTokenService.createToken(account.getEmail());
 
