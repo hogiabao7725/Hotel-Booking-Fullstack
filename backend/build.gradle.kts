@@ -48,6 +48,9 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.13.0")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.13.0")
 
+    // ImageKit
+    implementation("com.cloudinary:cloudinary-http5:2.4.0")
+
     // Docs
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2")
 

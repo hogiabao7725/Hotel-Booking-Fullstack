@@ -61,6 +61,10 @@ app:
   refresh-token:
     prefix: ${APP_REFRESH_TOKEN_PREFIX}
     expiration: ${APP_REFRESH_TOKEN_EXPIRATION}
+  cloudinary:
+    cloud-name: ${APP_CLOUDINARY_CLOUD_NAME}
+    api-key: ${APP_CLOUDINARY_API_KEY}
+    api-secret: ${APP_CLOUDINARY_API_SECRET}
 
 server:
   port: 8080
