@@ -6,12 +6,12 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum ErrorCode {
 
-    // System, Common
+    // ===== System, Common =====
     INVALID_INPUT("Invalid input parameters", HttpStatus.BAD_REQUEST),
     RESOURCE_NOT_FOUND("Resource not found", HttpStatus.NOT_FOUND),
     INTERNAL_SERVER_ERROR("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR),
 
-    // Auth
+    // ===== Auth =====
     AUTH_INVALID_CREDENTIALS("Invalid email or password", HttpStatus.UNAUTHORIZED),
     AUTH_ACCESS_TOKEN_EXPIRED("Access token has expired", HttpStatus.UNAUTHORIZED),
     AUTH_ACCESS_TOKEN_INVALID("Invalid access token", HttpStatus.UNAUTHORIZED),
@@ -20,15 +20,21 @@ public enum ErrorCode {
     AUTH_UNAUTHORIZED("Full authentication is required to access this resource", HttpStatus.UNAUTHORIZED),
     AUTH_FORBIDDEN("You do not have permission to access this resource", HttpStatus.FORBIDDEN),
 
-    // Account
+    // ===== Account =====
     ACCOUNT_EMAIL_ALREADY_EXISTS("Email is already in use", HttpStatus.CONFLICT),
     ACCOUNT_ALREADY_ACTIVE("Account is already active", HttpStatus.CONFLICT),
     ACCOUNT_INACTIVE("Account is inactive", HttpStatus.FORBIDDEN),
     ACCOUNT_BANNED("Account has been banned", HttpStatus.FORBIDDEN),
     ACCOUNT_ROLE_NOT_FOUND("Required role not found", HttpStatus.INTERNAL_SERVER_ERROR),
 
-    // Infra
-    EMAIL_SENDING_FAILED("Failed to send email", HttpStatus.INTERNAL_SERVER_ERROR);
+    // ===== Infra =====
+    EMAIL_SENDING_FAILED("Failed to send email", HttpStatus.INTERNAL_SERVER_ERROR),
+    FILE_EMPTY("Upload file is empty", HttpStatus.BAD_REQUEST),
+    FILE_INVALID_TYPE("Unsupported file type", HttpStatus.BAD_REQUEST),
+    FILE_SIZE_EXCEEDED("File size exceeds the maximum allowed limit", HttpStatus.BAD_REQUEST),
+    FILE_UPLOAD_FAILED("Failed to upload file", HttpStatus.INTERNAL_SERVER_ERROR),
+    FILE_DELETE_FAILED("Failed to delete file", HttpStatus.INTERNAL_SERVER_ERROR),
+    FILE_INVALID_URL("Invalid file URL", HttpStatus.BAD_REQUEST);
 
     private final String defaultMessage;
     private final HttpStatus httpStatus;
