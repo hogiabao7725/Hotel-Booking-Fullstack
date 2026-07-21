@@ -27,6 +27,9 @@ public enum ErrorCode {
     ACCOUNT_BANNED("Account has been banned", HttpStatus.FORBIDDEN),
     ACCOUNT_ROLE_NOT_FOUND("Required role not found", HttpStatus.INTERNAL_SERVER_ERROR),
 
+    // ===== Facility =====
+    FACILITY_NAME_ALREADY_EXISTS("hYeah Yea", HttpStatus.CONFLICT),
+
     // ===== Infra =====
     EMAIL_SENDING_FAILED("Failed to send email", HttpStatus.INTERNAL_SERVER_ERROR),
     FILE_EMPTY("Upload file is empty", HttpStatus.BAD_REQUEST),
