@@ -405,3 +405,4 @@ frontend/.idea/
 **/target/
 **/node_modules/
 **/dist/
+**/bin/
