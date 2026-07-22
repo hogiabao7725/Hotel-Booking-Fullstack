@@ -1,0 +1,48 @@
+services:
+  # Minio Server
+  minio-server:
+    image: minio/minio:latest
+    container_name: minio_server
+    restart: always
+    ports:
+      - "${MINIO_API_PORT}:9000"     # S3 API Port
+      - "${MINIO_CONSOLE_PORT}:9001" # Web Console Port
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Minio Client
+  minio-init:
+    image: minio/mc:latest
+    container_name: minio_client
+    restart: "no"
+    depends_on:
+      minio-server:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      echo '=====> Waiting for MinIO server...';
+      /usr/bin/mc alias set myminio http://minio-server:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD};
+
+      echo '=====> Creating bucket ${MINIO_BUCKET_NAME}...';
+      /usr/bin/mc mb --ignore-existing myminio/${MINIO_BUCKET_NAME};
+
+      echo '=====> Setting public policy for ${MINIO_BUCKET_NAME}...';
+      /usr/bin/mc anonymous set download myminio/${MINIO_BUCKET_NAME};
+
+      echo '=====> MinIO Auto-Setup Completed Successfully!';
+      exit 0;
+      "
+
+# Volumes
+volumes:
+  minio_data:
+    driver: local

@@ -32,12 +32,10 @@ public enum ErrorCode {
 
     // ===== Infra =====
     EMAIL_SENDING_FAILED("Failed to send email", HttpStatus.INTERNAL_SERVER_ERROR),
-    FILE_EMPTY("Upload file is empty", HttpStatus.BAD_REQUEST),
-    FILE_INVALID_TYPE("Unsupported file type", HttpStatus.BAD_REQUEST),
-    FILE_SIZE_EXCEEDED("File size exceeds the maximum allowed limit", HttpStatus.BAD_REQUEST),
-    FILE_UPLOAD_FAILED("Failed to upload file", HttpStatus.INTERNAL_SERVER_ERROR),
-    FILE_DELETE_FAILED("Failed to delete file", HttpStatus.INTERNAL_SERVER_ERROR),
-    FILE_INVALID_URL("Invalid file URL", HttpStatus.BAD_REQUEST);
+    FILE_EMPTY("Uploaded file must not be empty", HttpStatus.BAD_REQUEST),
+    FILE_INVALID_PATH("Invalid storage path", HttpStatus.BAD_REQUEST),
+    FILE_UPLOAD_FAILED("Failed to upload file to storage", HttpStatus.INTERNAL_SERVER_ERROR),
+    FILE_DELETE_FAILED("Failed to delete file from storage", HttpStatus.INTERNAL_SERVER_ERROR);
 
     private final String defaultMessage;
     private final HttpStatus httpStatus;

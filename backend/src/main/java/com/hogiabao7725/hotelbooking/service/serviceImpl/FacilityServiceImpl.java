@@ -1,6 +1,6 @@
 package com.hogiabao7725.hotelbooking.service.serviceImpl;
 
-import com.hogiabao7725.hotelbooking.constant.CloudinaryConstants;
+import com.hogiabao7725.hotelbooking.constant.StorageConstants;
 import com.hogiabao7725.hotelbooking.dto.request.facility.CreateFacilityRequest;
 import com.hogiabao7725.hotelbooking.dto.response.facility.FacilityResponse;
 import com.hogiabao7725.hotelbooking.entity.Facility;
@@ -13,8 +13,10 @@ import com.hogiabao7725.hotelbooking.service.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -32,16 +34,10 @@ public class FacilityServiceImpl implements FacilityService {
         validateDuplicateName(request.name());
 
         Facility facility = facilityMapper.toEntity(request);
-
-        String publicId = UUID.randomUUID().toString();
-        String iconUrl = fileStorageService.upload(
-                request.icon(),
-                CloudinaryConstants.FACILITIES,
-                publicId
-        );
-        facility.setIconUrl(iconUrl);
-
+        String iconPath = fileStorageService.store(request.icon(), StorageConstants.FACILITIES);
+        facility.setIconUrl(iconPath);
         facilityRepository.save(facility);
+
         return facilityMapper.toResponse(facility);
     }
 

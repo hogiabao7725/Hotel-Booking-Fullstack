@@ -10,7 +10,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
@@ -61,10 +61,14 @@ app:
   refresh-token:
     prefix: ${APP_REFRESH_TOKEN_PREFIX}
     expiration: ${APP_REFRESH_TOKEN_EXPIRATION}
-  cloudinary:
-    cloud-name: ${APP_CLOUDINARY_CLOUD_NAME}
-    api-key: ${APP_CLOUDINARY_API_KEY}
-    api-secret: ${APP_CLOUDINARY_API_SECRET}
+  s3:
+    endpoint: ${APP_S3_ENDPOINT}
+    region: ${APP_S3_REGION}
+    bucket: ${APP_S3_BUCKET}
+    access-key: ${APP_S3_ACCESS_KEY}
+    secret-key: ${APP_S3_SECRET_KEY}
+    path-style-access-enabled: ${APP_S3_PATH_STYLE_ACCESS_ENABLED}
+    public-url: ${APP_S3_PUBLIC_URL}
 
 server:
   port: 8080

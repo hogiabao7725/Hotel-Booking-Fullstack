@@ -3,27 +3,32 @@ package com.hogiabao7725.hotelbooking.service;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * Common service for file storage operations.
- * <p>
- * Handles uploading and deleting various file types
- * (such as images, documents, or videos) across storage providers.
+ * Provides common operations for storing and accessing files.
+ * Implementation may use S3, MinIO, Cloudinary...
  */
 public interface FileStorageService {
 
     /**
-     * Uploads a file to the storage provider.
+     * Stores a file at the specified storage location.
      *
-     * @param file     the multipart file to upload
-     * @param folder   the destination folder path
-     * @param publicId the custom public identifier for the file
-     * @return the public access URL of the uploaded file
+     * @param file     the file to store
+     * @param location the target storage location,
+     * @return the stored file path
      */
-    String upload(MultipartFile file, String folder, String publicId);
+    String store(MultipartFile file, String location);
 
     /**
-     * Deletes a file from the storage provider using its access URL.
+     * Resolves a stored file path into an accessible URL.
      *
-     * @param fileUrl the public URL of the file to be deleted
+     * @param path the stored file path
+     * @return the accessible URL, or {@code null} if the path is empty
      */
-    void delete(String fileUrl);
+    String resolveUrl(String path);
+
+    /**
+     * Deletes a file from storage.
+     *
+     * @param path the stored file path
+     */
+    void delete(String path);
 }
