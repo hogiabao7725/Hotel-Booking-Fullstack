@@ -13,10 +13,6 @@ import com.hogiabao7725.hotelbooking.service.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -34,11 +30,17 @@ public class FacilityServiceImpl implements FacilityService {
         validateDuplicateName(request.name());
 
         Facility facility = facilityMapper.toEntity(request);
-        String iconPath = fileStorageService.store(request.icon(), StorageConstants.FACILITIES);
+        String iconPath = fileStorageService.store(
+                request.icon(),
+                StorageConstants.FACILITIES
+        );
         facility.setIconUrl(iconPath);
-        facilityRepository.save(facility);
+        Facility savedFacility = facilityRepository.save(facility);
 
-        return facilityMapper.toResponse(facility);
+        String resolvedIconUrl =
+                fileStorageService.resolveUrl(savedFacility.getIconUrl());
+
+        return facilityMapper.toResponse(savedFacility, resolvedIconUrl);
     }
 
     private void validateDuplicateName(String name) {

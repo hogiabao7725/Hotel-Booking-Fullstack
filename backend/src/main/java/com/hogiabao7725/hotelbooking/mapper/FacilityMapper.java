@@ -13,5 +13,6 @@ public interface FacilityMapper {
     @Mapping(target = "iconUrl", ignore = true)
     Facility toEntity(CreateFacilityRequest request);
 
-    FacilityResponse toResponse(Facility facility);
+    @Mapping(target = "iconUrl", source = "resolvedIconUrl")
+    FacilityResponse toResponse(Facility facility, String resolvedIconUrl);
 }
