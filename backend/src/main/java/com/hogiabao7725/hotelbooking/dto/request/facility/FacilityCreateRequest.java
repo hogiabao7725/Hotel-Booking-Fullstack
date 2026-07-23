@@ -7,9 +7,10 @@ import com.hogiabao7725.hotelbooking.validation.file.NotEmptyFile;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import com.hogiabao7725.hotelbooking.utils.StringNormalizer;
 import org.springframework.web.multipart.MultipartFile;
 
-public record CreateFacilityRequest(
+public record FacilityCreateRequest(
         @NotBlank(message = "Name cannot be blank")
         @Size(min = 5, max = 50, message = "Name must be between {min} and {max} characters")
         String name,
@@ -21,4 +22,9 @@ public record CreateFacilityRequest(
         @AllowedFileTypes(FileConstants.SVG)
         @NotNull(message = "Icon file cannot be blank")
         MultipartFile icon
-) {}
+) {
+        public FacilityCreateRequest {
+                name = StringNormalizer.trimToNull(name);
+                description = StringNormalizer.trimToNull(description);
+        }
+}

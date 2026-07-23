@@ -1,7 +1,7 @@
 package com.hogiabao7725.hotelbooking.service.serviceImpl;
 
 import com.hogiabao7725.hotelbooking.constant.StorageConstants;
-import com.hogiabao7725.hotelbooking.dto.request.facility.CreateFacilityRequest;
+import com.hogiabao7725.hotelbooking.dto.request.facility.FacilityCreateRequest;
 import com.hogiabao7725.hotelbooking.dto.response.facility.FacilityResponse;
 import com.hogiabao7725.hotelbooking.entity.Facility;
 import com.hogiabao7725.hotelbooking.exception.AppException;
@@ -26,21 +26,28 @@ public class FacilityServiceImpl implements FacilityService {
 
     @Override
     @Transactional
-    public FacilityResponse create(CreateFacilityRequest request) {
+    public FacilityResponse create(FacilityCreateRequest request) {
         validateDuplicateName(request.name());
 
         Facility facility = facilityMapper.toEntity(request);
+
         String iconPath = fileStorageService.store(
                 request.icon(),
                 StorageConstants.FACILITIES
         );
         facility.setIconUrl(iconPath);
-        Facility savedFacility = facilityRepository.save(facility);
 
-        String resolvedIconUrl =
-                fileStorageService.resolveUrl(savedFacility.getIconUrl());
+        try {
+            Facility savedFacility = facilityRepository.save(facility);
 
-        return facilityMapper.toResponse(savedFacility, resolvedIconUrl);
+            String resolvedIconUrl =
+                    fileStorageService.resolveUrl(savedFacility.getIconUrl());
+
+            return facilityMapper.toResponse(savedFacility, resolvedIconUrl);
+        } catch (Exception ex) {
+            fileStorageService.delete(iconPath);
+            throw ex;
+        }
     }
 
     private void validateDuplicateName(String name) {

@@ -28,7 +28,7 @@ public enum ErrorCode {
     ACCOUNT_ROLE_NOT_FOUND("Required role not found", HttpStatus.INTERNAL_SERVER_ERROR),
 
     // ===== Facility =====
-    FACILITY_NAME_ALREADY_EXISTS("hYeah Yea", HttpStatus.CONFLICT),
+    FACILITY_NAME_ALREADY_EXISTS("Facility name already exists", HttpStatus.CONFLICT),
 
     // ===== Infra =====
     EMAIL_SENDING_FAILED("Failed to send email", HttpStatus.INTERNAL_SERVER_ERROR),
