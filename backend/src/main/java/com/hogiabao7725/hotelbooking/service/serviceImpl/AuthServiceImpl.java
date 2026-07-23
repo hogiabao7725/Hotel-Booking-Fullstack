@@ -56,34 +56,21 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public RegisterResponse register(RegisterRequest request) {
-        Optional<Account> existingAccountOpt = accountService.findByEmail(request.email());
-        Account account;
-
-        if (existingAccountOpt.isPresent()) {
-            account = existingAccountOpt.get();
-
-            // Reject registration if email is already active or banned
-            // Only for inactive account if account present
-            if (account.getStatus() != AccountStatus.INACTIVE) {
-                throw new AppException(ErrorCode.ACCOUNT_EMAIL_ALREADY_EXISTS);
-            }
-
-            // Update existing unverified account
-            account.setPasswordHash(passwordEncoder.encode(request.password()));
-            Profile profile = account.getProfile();
-            profile.setFullName(request.fullName());
-        } else {
-            // Create a new account
-            Role customerRole = roleService.getByName(UserRole.ROLE_CUSTOMER);
-
-            account = accountMapper.toEntity(request);
-            account.setPasswordHash(passwordEncoder.encode(request.password()));
-            account.setRole(customerRole);
-            account.setStatus(AccountStatus.INACTIVE);
-
-            Profile profile = profileMapper.toEntity(request);
-            account.setProfile(profile);
+        if (accountService.findByEmail(request.email()).isPresent()) {
+            throw new AppException(ErrorCode.ACCOUNT_EMAIL_ALREADY_EXISTS);
         }
+
+        // Create a new account
+        Role customerRole = roleService.getByName(UserRole.ROLE_CUSTOMER);
+
+        Account account = accountMapper.toEntity(request);
+        account.setPasswordHash(passwordEncoder.encode(request.password()));
+        account.setRole(customerRole);
+        account.setStatus(AccountStatus.INACTIVE);
+
+        Profile profile = profileMapper.toEntity(request);
+        account.setProfile(profile);
+
         account = accountService.save(account);
 
         // Generate verification token and send email

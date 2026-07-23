@@ -155,41 +155,21 @@ class AuthServiceImplTest {
     }
 
     @Test
-    void register_shouldUpdateExistingInactiveAccountSuccessfully_whenEmailExistsButInactive() {
+    void register_shouldThrowException_whenEmailExistsEvenIfInactive() {
         // Arrange
         RegisterRequest request = createRegisterRequest("inactiveuser@example.com", "Updated Name");
         Profile oldProfile = createProfile(5L, "Old Name");
         Account existingInactiveAccount = createAccount(1L, "inactiveuser@example.com", AccountStatus.INACTIVE, oldProfile);
-        Account savedAccount = createAccount(1L, "inactiveuser@example.com", AccountStatus.INACTIVE, oldProfile);
-        RegisterResponse expectedResponse = new RegisterResponse(1L, "inactiveuser@example.com", "Updated Name", "ROLE_CUSTOMER");
 
         when(accountService.findByEmail(request.email())).thenReturn(Optional.of(existingInactiveAccount));
-        when(passwordEncoder.encode(request.password())).thenReturn("encodedNewPassword");
-        when(accountService.save(existingInactiveAccount)).thenReturn(savedAccount);
 
-        when(emailVerificationTokenService.createToken("inactiveuser@example.com")).thenReturn("newToken123");
-        when(accountMapper.toResponse(savedAccount)).thenReturn(expectedResponse);
-
-        // Act
-        RegisterResponse result = authService.register(request);
-
-        // Assert
-        assertThat(result).isNotNull();
-        assertThat(result.accountId()).isEqualTo(expectedResponse.accountId());
-        assertThat(result.email()).isEqualTo(expectedResponse.email());
-        assertThat(result.fullName()).isEqualTo(expectedResponse.fullName());
-        assertThat(result.role()).isEqualTo(expectedResponse.role());
-
-        assertThat(existingInactiveAccount.getPasswordHash()).isEqualTo("encodedNewPassword");
-        assertThat(existingInactiveAccount.getProfile().getFullName()).isEqualTo("Updated Name");
+        // Act & Assert
+        assertThatThrownBy(() -> authService.register(request))
+                .isInstanceOf(AppException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ACCOUNT_EMAIL_ALREADY_EXISTS);
 
         verify(accountService).findByEmail(request.email());
-        verify(passwordEncoder).encode(request.password());
-        verify(emailVerificationTokenService).createToken("inactiveuser@example.com");
-        verify(emailService).sendVerification("inactiveuser@example.com", "Updated Name", "newToken123");
-        verify(accountMapper).toResponse(savedAccount);
-
-        verifyNoInteractions(roleService, profileMapper);
+        verifyNoMoreInteractions(accountService, roleService, passwordEncoder, accountMapper, profileMapper, emailVerificationTokenService, emailService);
     }
 
     @Test

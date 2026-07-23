@@ -1,5 +1,6 @@
 package com.hogiabao7725.hotelbooking.dto.request.auth;
 
+import com.hogiabao7725.hotelbooking.utils.StringNormalizer;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -18,4 +19,8 @@ public record RegisterRequest(
         @NotBlank(message = "Full name cannot be blank")
         String fullName
 ) {
+        public RegisterRequest {
+                email = StringNormalizer.trimToNull(email);
+                fullName = StringNormalizer.trimToNull(fullName);
+        }
 }
