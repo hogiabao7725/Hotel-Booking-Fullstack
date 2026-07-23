@@ -26,7 +26,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AppException.class)
     public ResponseEntity<ApiResponse<Void>> handleAppException(AppException ex) {
         ErrorCode errorCode = ex.getErrorCode();
-        log.error("AppException [{}]: {}", errorCode.name(), ex.getMessage(), ex);
+
+        if (errorCode.getHttpStatus().is5xxServerError()) {
+            log.error(
+                    "Application server error: code={} message={}",
+                    errorCode.name(),
+                    ex.getMessage(),
+                    ex
+            );
+        }
 
         return ResponseEntity
                 .status(errorCode.getHttpStatus())
@@ -96,7 +104,7 @@ public class GlobalExceptionHandler {
     // ===================
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleAll(Exception ex) {
-        log.error("AppException: {}", ex);
+        log.error("Unexpected server error", ex);
         return buildResponse(ErrorCode.INTERNAL_SERVER_ERROR);
     }
 
