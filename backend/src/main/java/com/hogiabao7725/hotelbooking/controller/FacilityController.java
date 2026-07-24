@@ -1,6 +1,8 @@
 package com.hogiabao7725.hotelbooking.controller;
 
+import com.hogiabao7725.hotelbooking.constant.AppConstants;
 import com.hogiabao7725.hotelbooking.dto.common.ApiResponse;
+import com.hogiabao7725.hotelbooking.dto.common.PageResponse;
 import com.hogiabao7725.hotelbooking.dto.request.facility.FacilityCreateRequest;
 import com.hogiabao7725.hotelbooking.dto.request.facility.FacilityUpdateRequest;
 import com.hogiabao7725.hotelbooking.dto.response.facility.FacilityResponse;
@@ -38,6 +40,15 @@ public class FacilityController {
     public ApiResponse<FacilityResponse> getById(@PathVariable Long id) {
         FacilityResponse response = facilityService.getById(id);
         return ApiResponse.success("Get facility successfully", response);
+    }
+
+    @GetMapping
+    public ApiResponse<PageResponse<FacilityResponse>> getAll(
+            @RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE, required = false) int page,
+            @RequestParam(value = "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int size
+    ) {
+        PageResponse<FacilityResponse> response = facilityService.getAll(page, size);
+        return ApiResponse.success("Get all facilities successfully", response);
     }
 
     @DeleteMapping("/{id}")

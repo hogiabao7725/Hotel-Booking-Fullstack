@@ -4,9 +4,7 @@ import com.hogiabao7725.hotelbooking.constant.FileConstants;
 import com.hogiabao7725.hotelbooking.utils.StringNormalizer;
 import com.hogiabao7725.hotelbooking.validation.file.AllowedFileTypes;
 import com.hogiabao7725.hotelbooking.validation.file.MaxFileSize;
-import com.hogiabao7725.hotelbooking.validation.file.NotEmptyFile;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import org.springframework.web.multipart.MultipartFile;
 

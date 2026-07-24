@@ -1,6 +1,7 @@
 package com.hogiabao7725.hotelbooking.service.serviceImpl;
 
 import com.hogiabao7725.hotelbooking.constant.StorageConstants;
+import com.hogiabao7725.hotelbooking.dto.common.PageResponse;
 import com.hogiabao7725.hotelbooking.dto.request.facility.FacilityCreateRequest;
 import com.hogiabao7725.hotelbooking.dto.request.facility.FacilityUpdateRequest;
 import com.hogiabao7725.hotelbooking.dto.response.facility.FacilityResponse;
@@ -13,6 +14,9 @@ import com.hogiabao7725.hotelbooking.service.FacilityService;
 import com.hogiabao7725.hotelbooking.service.FileStorageService;
 import com.hogiabao7725.hotelbooking.service.transaction.TransactionalFileManager;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -87,6 +91,20 @@ public class FacilityServiceImpl implements FacilityService {
 
         String resolvedIconUrl = fileStorageService.resolveUrl(facility.getIconUrl());
         return facilityMapper.toResponse(facility, resolvedIconUrl);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<FacilityResponse> getAll(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Facility> facilityPage = facilityRepository.findAll(pageable);
+
+        Page<FacilityResponse> facilityResponsePage = facilityPage
+                .map(facility -> {
+                    String path = fileStorageService.resolveUrl(facility.getIconUrl());
+                    return facilityMapper.toResponse(facility, path);
+                });
+        return PageResponse.from(facilityResponsePage);
     }
 
     @Override
