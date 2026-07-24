@@ -52,14 +52,7 @@ public class S3FileStorageServiceImpl implements FileStorageService {
 
             return objectKey;
         } catch (IOException | SdkException exception) {
-            log.error(
-                    "Failed to upload file to S3. Object key: {}, error: {}",
-                    objectKey,
-                    exception.getMessage(),
-                    exception
-            );
-
-            throw new AppException(ErrorCode.FILE_UPLOAD_FAILED);
+            throw new AppException(ErrorCode.FILE_UPLOAD_FAILED, exception);
         }
     }
 
@@ -92,14 +85,7 @@ public class S3FileStorageServiceImpl implements FileStorageService {
                     .key(objectKey)
             );
         } catch (SdkException exception) {
-            log.error(
-                    "Failed to delete file from S3. Object key: {}, error: {}",
-                    objectKey,
-                    exception.getMessage(),
-                    exception
-            );
-
-            throw new AppException(ErrorCode.FILE_DELETE_FAILED);
+            throw new AppException(ErrorCode.FILE_DELETE_FAILED, exception);
         }
     }
 
