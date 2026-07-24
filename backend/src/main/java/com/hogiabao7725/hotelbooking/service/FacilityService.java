@@ -9,4 +9,8 @@ public interface FacilityService {
     FacilityResponse create(FacilityCreateRequest request);
 
     FacilityResponse update(Long id, FacilityUpdateRequest request);
+
+    FacilityResponse getById(Long id);
+
+    void deleteById(Long id);
 }

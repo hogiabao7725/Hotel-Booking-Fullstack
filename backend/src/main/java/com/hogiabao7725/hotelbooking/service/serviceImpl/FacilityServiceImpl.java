@@ -79,6 +79,26 @@ public class FacilityServiceImpl implements FacilityService {
         return facilityMapper.toResponse(updatedFacility, resolvedIconUrl);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public FacilityResponse getById(Long id) {
+        Facility facility = facilityRepository.findById(id)
+                .orElseThrow(() -> AppException.notFound("Facility", "id", id));
+
+        String resolvedIconUrl = fileStorageService.resolveUrl(facility.getIconUrl());
+        return facilityMapper.toResponse(facility, resolvedIconUrl);
+    }
+
+    @Override
+    @Transactional
+    public void deleteById(Long id) {
+        Facility facility = facilityRepository.findById(id)
+                .orElseThrow(() -> AppException.notFound("Facility", "id", id));
+        String path = facility.getIconUrl();
+        facilityRepository.delete(facility);
+        transactionalFileManager.deleteAfterCommit(path);
+    }
+
     private void validateDuplicateName(String name) {
         if (facilityRepository.existsByNameIgnoreCase(name)) {
             throw new AppException(ErrorCode.FACILITY_NAME_ALREADY_EXISTS);

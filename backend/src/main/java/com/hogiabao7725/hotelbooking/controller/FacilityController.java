@@ -8,12 +8,7 @@ import com.hogiabao7725.hotelbooking.service.FacilityService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/facilities")
@@ -37,5 +32,17 @@ public class FacilityController {
     ) {
         FacilityResponse response = facilityService.update(id, request);
         return ApiResponse.success("Update facility successfully", response);
+    }
+
+    @GetMapping("/{id}")
+    public ApiResponse<FacilityResponse> getById(@PathVariable Long id) {
+        FacilityResponse response = facilityService.getById(id);
+        return ApiResponse.success("Get facility successfully", response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ApiResponse<Void> deleteById(@PathVariable Long id) {
+        facilityService.deleteById(id);
+        return ApiResponse.success("Delete facility successfully");
     }
 }
