@@ -1,7 +1,5 @@
 package com.hogiabao7725.hotelbooking.constant;
 
-import java.util.Set;
-
 public final class FileConstants {
 
     private FileConstants() {

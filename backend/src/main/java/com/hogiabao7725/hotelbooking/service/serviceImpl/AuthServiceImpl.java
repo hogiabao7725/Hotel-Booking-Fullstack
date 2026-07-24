@@ -10,15 +10,15 @@ import com.hogiabao7725.hotelbooking.entity.Profile;
 import com.hogiabao7725.hotelbooking.entity.Role;
 import com.hogiabao7725.hotelbooking.enums.AccountStatus;
 import com.hogiabao7725.hotelbooking.enums.UserRole;
+import com.hogiabao7725.hotelbooking.event.UserRegisteredEvent;
 import com.hogiabao7725.hotelbooking.exception.*;
 import com.hogiabao7725.hotelbooking.mapper.AccountMapper;
 import com.hogiabao7725.hotelbooking.mapper.ProfileMapper;
-import com.hogiabao7725.hotelbooking.repository.AccountRepository;
-import com.hogiabao7725.hotelbooking.repository.RoleRepository;
 import com.hogiabao7725.hotelbooking.security.jwt.JwtTokenProvider;
 import com.hogiabao7725.hotelbooking.service.*;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,8 +31,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -42,6 +40,7 @@ public class AuthServiceImpl implements AuthService {
     private final EmailService emailService;
     private final AccountService accountService;
     private final RoleService roleService;
+    private final ApplicationEventPublisher eventPublisher;
 
     private final AccountMapper accountMapper;
     private final ProfileMapper profileMapper;
@@ -75,7 +74,12 @@ public class AuthServiceImpl implements AuthService {
 
         // Generate verification token and send email
         String token = emailVerificationTokenService.createToken(account.getEmail());
-        emailService.sendVerification(account.getEmail(), account.getProfile().getFullName(), token);
+
+        eventPublisher.publishEvent(new UserRegisteredEvent(
+                account.getEmail(),
+                account.getProfile().getFullName(),
+                token
+        ));
 
         return accountMapper.toResponse(account);
     }
