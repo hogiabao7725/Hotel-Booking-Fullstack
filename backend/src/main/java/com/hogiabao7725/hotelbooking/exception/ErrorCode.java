@@ -30,6 +30,9 @@ public enum ErrorCode {
     // ===== Facility =====
     FACILITY_NAME_ALREADY_EXISTS("Facility name already exists", HttpStatus.CONFLICT),
 
+    // ===== Feature =====
+    FEATURE_NAME_ALREADY_EXISTS("Feature name already exists", HttpStatus.CONFLICT),
+
     // ===== Infra =====
     EMAIL_SENDING_FAILED("Failed to send email", HttpStatus.INTERNAL_SERVER_ERROR),
     FILE_EMPTY("Uploaded file must not be empty", HttpStatus.BAD_REQUEST),
